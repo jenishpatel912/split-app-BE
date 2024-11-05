@@ -117,3 +117,57 @@ export const getGroupDetails = async (req, res, next) => {
     next(err);
   }
 };
+
+export const addMembersinGroup = async (req, res, next) => {
+  try {
+
+    const { groupId, newUsers } = req.body;
+   
+    // get group
+    const groupInfo = await Group.findById(groupId);
+
+    console.log(groupInfo.users,newUsers,"group users");
+
+
+
+    if(!groupInfo){
+      return sendError(res,404,"Group not found.")
+    };
+
+    // newUsers.map(item=> new mongoose.Types.ObjectId(item) )
+
+    const updateduserList = [...groupInfo.users,...newUsers];
+
+    const finalList = [...new Set(updateduserList)];
+
+    console.log(finalList,"finalList");
+
+    groupInfo.users = finalList;
+
+    //  groupInfo.save();
+
+    const newRecords = newUsers.map((item) => ({
+      groupId,
+      userId: item,
+      expense: 0,
+    }));
+
+
+     await Promise.all([groupInfo.save(),GroupRecord.insertMany(newRecords)]);
+
+     return sendResponse(res,200,"New records added successful.")
+
+    // await GroupRecord.insertMany()
+     
+
+    
+    // console.log(groupInfo)
+
+
+
+  }
+  catch (err) {
+    console.log(err);
+    next(err);
+  }
+}

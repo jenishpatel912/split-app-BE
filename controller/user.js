@@ -80,8 +80,11 @@ const getAllUser = async (req,res,next) => {
   try{
 
     const user = req.user;
+    const text = req.query?.text || '' ;
+
+    console.log(text,"text")
     
-    const userList = await User.find({_id:{$ne:user.id}})
+    const userList = await User.find({_id:{$ne:user.id},name:{$regex:text,$options:'i'}})
     
     return sendResponse(
       res,
